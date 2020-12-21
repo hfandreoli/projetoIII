@@ -56,7 +56,7 @@ public class TrafficLightServer extends Thread {
 
     private void startClient(int port) throws IOException {
         networkManager.send(new NetWrapper(Command.NEXT_STATE), port);
-        activeClients.add(new ClientIdentification(port));
+        activeClients.add(new ClientIdentification(port, networkManager));
     }
 
     private void output(){

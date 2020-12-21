@@ -15,17 +15,23 @@ public class TrafficLight {
     public TrafficLight() throws IOException {
         ClientNetworkManager networkManager = new ClientNetworkManager();
         networkManager.send(new NetWrapper(Command.REGISTER), SysParameters.serverPort);
+        currentState = TrafficLightState.REGISTERED;
+        System.out.println("novo estado: " + currentState.getDescription());
 
         socket = new DatagramSocket();
         System.out.println("enviado");
 
-        try {
-            NetWrapper message = networkManager.receive();
-            if (message.getCommand() == Command.NEXT_STATE){
-                System.out.println("mudar para o verde");
+        while (true) {
+            try {
+                NetWrapper message = networkManager.receive();
+                if (message.getCommand() == Command.NEXT_STATE) {
+                    currentState = currentState.getNextState();
+                    System.out.println("novo estado: " + currentState.getDescription());
+                }
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+                break;
             }
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
         }
     }
 }
