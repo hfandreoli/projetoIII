@@ -11,8 +11,6 @@ public class DisclaimerAction implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         JFrame helpScreen = new JFrame();
         JPanel panel = new JPanel();
-        ImageIcon imageIcon = new ImageIcon("unicampLogo.png");
-        JLabel imageLabel = new JLabel(imageIcon);
         JTextArea helpTextArea = new JTextArea(10, 25);
         JScrollPane scrollPane = new JScrollPane(helpTextArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
@@ -29,7 +27,6 @@ public class DisclaimerAction implements ActionListener {
         helpTextArea.setEditable(false);
 
         // Inserting components into JFrame
-        panel.add(imageLabel);
         panel.add(scrollPane, BorderLayout.PAGE_START);
         helpScreen.getContentPane().add(panel);
     }

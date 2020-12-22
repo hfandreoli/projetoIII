@@ -11,8 +11,6 @@ public class HelpAction implements ActionListener{
     public void actionPerformed(ActionEvent e){
         JFrame howToScreen = new JFrame();
         JPanel panel = new JPanel();
-        ImageIcon imageIcon = new ImageIcon("unicampLogo.png");
-        JLabel imageLabel = new JLabel(imageIcon);
         JTextArea howToTextArea = new JTextArea(10, 25);
         JScrollPane scrollPane = new JScrollPane(howToTextArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
@@ -29,7 +27,6 @@ public class HelpAction implements ActionListener{
         howToTextArea.setEditable(false);
 
         // Inserting components into JFrame
-        panel.add(imageLabel);
         panel.add(scrollPane, BorderLayout.PAGE_START);
         howToScreen.getContentPane().add(panel);
     }
