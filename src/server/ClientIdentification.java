@@ -9,11 +9,11 @@ public class ClientIdentification {
     private TrafficLightState currentState;
     private Timer timer;
 
-    public ClientIdentification(int port, ServerNetworkManager serverNetworkManager) {
+    public ClientIdentification(int port, TrafficLightServer server) {
         this.port = port;
         currentState = TrafficLightState.GREEN;
         timer = new Timer();
-        timer.schedule(new TimerTask(this, serverNetworkManager), 4000, 4000);
+        timer.schedule(new TimerTask(this, server), 4000, 4000);
     }
 
     public int getPort() {
@@ -24,11 +24,11 @@ public class ClientIdentification {
         currentState = currentState.getNextState();
     }
 
-    public void setState(TrafficLightState newState) {
-        currentState = newState;
-    }
-
     public TrafficLightState getState() {
         return currentState;
+    }
+
+    public void stopTimer(){
+        timer.cancel();
     }
 }

@@ -1,36 +1,53 @@
 package client;
 
 import common.*;
+
 import java.io.*;
 import java.net.*;
 
 public class TrafficLight {
-    private TrafficLightState currentState;
-    private DatagramSocket socket = null;
+
+    private static ClientNetworkManager networkManager;
 
     public static void main(String[] args) throws IOException {
-        TrafficLight trafficLight = new TrafficLight();
+        ShutDownTask shutDownTask = new ShutDownTask();
+        Runtime.getRuntime().addShutdownHook(shutDownTask);
+
+        new TrafficLight();
     }
 
     public TrafficLight() throws IOException {
-        ClientNetworkManager networkManager = new ClientNetworkManager();
-        networkManager.send(new NetWrapper(Command.REGISTER), SysParameters.serverPort);
-        currentState = TrafficLightState.REGISTERED;
-        System.out.println("novo estado: " + currentState.getDescription());
+        TrafficLightWindow window = new TrafficLightWindow();
 
-        socket = new DatagramSocket();
-        System.out.println("enviado");
+        networkManager = new ClientNetworkManager();
+        networkManager.send(new NetWrapper(Command.REGISTER), SysParameters.serverPort);
+        TrafficLightState currentState = TrafficLightState.REGISTERED;
 
         while (true) {
             try {
                 NetWrapper message = networkManager.receive();
                 if (message.getCommand() == Command.NEXT_STATE) {
                     currentState = currentState.getNextState();
-                    System.out.println("novo estado: " + currentState.getDescription());
+                    switch (currentState) {
+                        case GREEN -> window.panel.light.setGreen();
+                        case YELLOW -> window.panel.light.setYellow();
+                        case RED -> window.panel.light.setRed();
+                    }
                 }
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
                 break;
+            }
+        }
+    }
+
+    private static class ShutDownTask extends Thread {
+        @Override
+        public void run() {
+            try {
+                networkManager.send(new NetWrapper(Command.FINALIZE), SysParameters.serverPort);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }

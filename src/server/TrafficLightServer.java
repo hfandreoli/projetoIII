@@ -1,6 +1,7 @@
 package server;
 
 import common.*;
+
 import java.io.*;
 import java.net.*;
 import java.time.Clock;
@@ -10,7 +11,7 @@ import java.util.Date;
 public class TrafficLightServer extends Thread {
     private ArrayList<ClientIdentification> activeClients;
     ServerNetworkManager networkManager;
-    Scheduler scheduler;
+    Mediator mediator;
 
     public static void main(String[] args) throws IOException {
         new TrafficLightServer().start();
@@ -22,12 +23,16 @@ public class TrafficLightServer extends Thread {
 
     public TrafficLightServer(String name) throws IOException {
         super(name);
+        mediator = new Mediator();
         activeClients = new ArrayList<>();
-//        scheduler = new Scheduler(activeClients);
-//        scheduler.start();
+    }
+
+    public ServerNetworkManager getNetwork(){
+        return networkManager;
     }
 
     public void run() {
+        mediator.updateLog(activeClients);
 
         try {
             networkManager = new ServerNetworkManager();
@@ -40,9 +45,10 @@ public class TrafficLightServer extends Thread {
             try {
                 NetWrapper message = networkManager.receive();
 
-                if (message.getCommand() == Command.REGISTER){
+                if (message.getCommand() == Command.REGISTER) {
                     startClient(networkManager.getSenderPort());
-                    output();
+                } else if (message.getCommand() == Command.FINALIZE) {
+                    removeClient(networkManager.getSenderPort());
                 }
 
             } catch (IOException | ClassNotFoundException e) {
@@ -56,14 +62,22 @@ public class TrafficLightServer extends Thread {
 
     private void startClient(int port) throws IOException {
         networkManager.send(new NetWrapper(Command.NEXT_STATE), port);
-        activeClients.add(new ClientIdentification(port, networkManager));
+        activeClients.add(new ClientIdentification(port, this));
+        updateLog();
     }
 
-    private void output(){
-        System.out.flush();
+    private void removeClient(int port){
         for (ClientIdentification client : activeClients) {
-            System.out.println(client.getPort());
-            System.out.println(client.getState().getDescription());
+            if (client.getPort() == port){
+                client.stopTimer();
+                activeClients.remove(client);
+                updateLog();
+                break;
+            }
         }
-        }
+    }
+
+    public void updateLog() {
+        mediator.updateLog(activeClients);
+    }
 }
